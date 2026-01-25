@@ -20,16 +20,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         
         <div className="flex justify-center">
           <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform group">
-            <div className="bg-white/10 p-1.5 rounded-xl backdrop-blur-sm border border-white/20 group-hover:bg-white/20 transition-colors shadow-inner flex items-center justify-center overflow-hidden h-12 w-12">
+            {/* Conteneur avec fond blanc solide pour que n'importe quel logo soit visible */}
+            <div className="bg-white p-1 rounded-xl shadow-inner flex items-center justify-center overflow-hidden h-12 w-12 border border-white/20 transition-colors">
               {!logoError ? (
                 <img 
-                  src="logo.png" 
+                  src="/logo.png" 
                   alt="Logo" 
                   className="h-full w-full object-contain" 
-                  onError={() => setLogoError(true)} 
+                  onError={() => {
+                    console.log("Erreur de chargement du logo, passage au fallback.");
+                    setLogoError(true);
+                  }} 
                 />
               ) : (
-                <Wine size={24} className="text-amber-100" />
+                <Wine size={24} className="text-[#5d4037]" />
               )}
             </div>
             <span className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm whitespace-nowrap">
