@@ -18,8 +18,8 @@ const SearchRate: React.FC = () => {
   const [filter, setFilter] = useState({ 
     couleur: 'Toutes', 
     stockSeul: true, 
-    minDeg: 0, 
-    maxDeg: 100 
+    minDeg: '', 
+    maxDeg: '' 
   });
 
   const [selectedRum, setSelectedRum] = useState<Rum | null>(null);
@@ -54,7 +54,12 @@ const SearchRate: React.FC = () => {
     );
     if (filter.couleur !== 'Toutes') result = result.filter(r => r.couleur === filter.couleur);
     if (filter.stockSeul) result = result.filter(r => r.enStock);
-    result = result.filter(r => r.degres >= filter.minDeg && r.degres <= filter.maxDeg);
+    
+    // Filtrage avec conversion sécurisée
+    const min = filter.minDeg === '' ? 0 : Number(filter.minDeg);
+    const max = filter.maxDeg === '' ? 100 : Number(filter.maxDeg);
+    
+    result = result.filter(r => r.degres >= min && r.degres <= max);
     setFilteredRums(result);
   }, [searchTerm, rums, filter]);
 
@@ -64,7 +69,7 @@ const SearchRate: React.FC = () => {
     
     setIsSubmitting(true);
     try {
-      addDoc(tastingsCol, {
+      await addDoc(tastingsCol, {
         userId: selectedUser.id,
         rumId: selectedRum.id,
         note: rating,
@@ -118,8 +123,20 @@ const SearchRate: React.FC = () => {
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-black text-amber-800 uppercase mb-2 px-1">Degrés (%)</label>
             <div className="flex gap-3">
-              <input type="number" value={filter.minDeg} onChange={(e) => setFilter({...filter, minDeg: Number(e.target.value)})} placeholder="Min" className="w-full p-4 rounded-2xl bg-amber-50 border-none outline-none font-bold text-amber-900 shadow-inner" />
-              <input type="number" value={filter.maxDeg} onChange={(e) => setFilter({...filter, maxDeg: Number(e.target.value)})} placeholder="Max" className="w-full p-4 rounded-2xl bg-amber-50 border-none outline-none font-bold text-amber-900 shadow-inner" />
+              <input 
+                type="number" 
+                value={filter.minDeg} 
+                onChange={(e) => setFilter({...filter, minDeg: e.target.value})} 
+                placeholder="Min" 
+                className="w-full p-4 rounded-2xl bg-amber-50 border-none outline-none font-bold text-amber-900 shadow-inner" 
+              />
+              <input 
+                type="number" 
+                value={filter.maxDeg} 
+                onChange={(e) => setFilter({...filter, maxDeg: e.target.value})} 
+                placeholder="Max" 
+                className="w-full p-4 rounded-2xl bg-amber-50 border-none outline-none font-bold text-amber-900 shadow-inner" 
+              />
             </div>
           </div>
           <button onClick={() => setFilter({...filter, stockSeul: !filter.stockSeul})} className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-black transition-all border-4 ${filter.stockSeul ? 'bg-amber-800 border-amber-800 text-white' : 'bg-white border-amber-100 text-amber-800'} shadow-lg`}>

@@ -11,7 +11,16 @@ const Home: React.FC = () => {
   const [showAddUser, setShowAddUser] = useState(false);
   const [showAddRum, setShowAddRum] = useState(false);
   const [newUser, setNewUser] = useState({ nom: '', prenom: '' });
-  const [newRum, setNewRum] = useState({ nom: '', couleur: 'Ambré', degres: 40, enStock: true });
+  
+  // État initial du rhum
+  const [newRum, setNewRum] = useState({ 
+    nom: '', 
+    couleur: 'Ambré', 
+    degres: '40', 
+    enStock: true, 
+    description: '' 
+  });
+  
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -25,9 +34,10 @@ const Home: React.FC = () => {
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUser.nom || !newUser.prenom || loading) return;
+    if (!newUser.nom.trim() || !newUser.prenom.trim() || loading) return;
+    
     setLoading(true);
-    const newNomPrenom = `${newUser.nom}_${newUser.prenom}`.toLowerCase();
+    const newNomPrenom = `${newUser.nom.trim()}_${newUser.prenom.trim()}`.toLowerCase();
     const alreadyExists = users.some(u => u.nom_prenom === newNomPrenom);
 
     if (alreadyExists) {
@@ -37,15 +47,16 @@ const Home: React.FC = () => {
     }
 
     try {
-      addDoc(usersCol, {
-        nom: newUser.nom,
-        prenom: newUser.prenom,
+      await addDoc(usersCol, {
+        nom: newUser.nom.trim(),
+        prenom: newUser.prenom.trim(),
         nom_prenom: newNomPrenom
       });
       setNewUser({ nom: '', prenom: '' });
       setShowAddUser(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert("Erreur lors de l'ajout du membre : " + (err.message || "Vérifiez votre configuration Firebase"));
     } finally {
       setLoading(false);
     }
@@ -53,15 +64,41 @@ const Home: React.FC = () => {
 
   const handleAddRum = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newRum.nom || loading) return;
+    
+    // Validation stricte
+    if (!newRum.nom.trim()) {
+      alert("Le nom du rhum est obligatoire");
+      return;
+    }
+    
+    if (loading) return;
     setLoading(true);
+
     try {
-      addDoc(rumsCol, newRum);
-      setNewRum({ nom: '', couleur: 'Ambré', degres: 40, enStock: true });
+      const rumData = {
+        nom: newRum.nom.trim(),
+        couleur: newRum.couleur,
+        degres: parseFloat(newRum.degres) || 0,
+        enStock: newRum.enStock,
+        description: (newRum.description || '').trim() || null
+      };
+
+      console.log("Tentative d'ajout du rhum:", rumData);
+      
+      await addDoc(rumsCol, rumData);
+      
+      // Reset et fermeture
+      setNewRum({ nom: '', couleur: 'Ambré', degres: '40', enStock: true, description: '' });
       setShowAddRum(false);
-      navigate('/inventory');
-    } catch (err) {
-      console.error(err);
+      
+      // Petit délai pour laisser Firestore synchroniser localement avant la redirection
+      setTimeout(() => {
+        navigate('/inventory');
+      }, 100);
+
+    } catch (err: any) {
+      console.error("Erreur Firestore détaillée:", err);
+      alert("Impossible d'enregistrer le rhum. Erreur : " + (err.message || "Vérifiez votre connexion ou votre clé API Firebase dans lib/firebase.ts"));
     } finally {
       setLoading(false);
     }
@@ -129,7 +166,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Modals */}
+      {/* Modal Membre */}
       {showAddUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl">
@@ -145,41 +182,81 @@ const Home: React.FC = () => {
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowAddUser(false)} className="flex-1 py-5 font-bold text-amber-900 bg-amber-100 rounded-2xl">Annuler</button>
-                <button type="submit" disabled={loading} className="flex-1 py-5 font-bold text-white bg-amber-700 rounded-2xl shadow-lg disabled:opacity-50">Enregistrer</button>
+                <button type="submit" disabled={loading} className="flex-1 py-5 font-bold text-white bg-amber-700 rounded-2xl shadow-lg disabled:opacity-50">
+                  {loading ? "En cours..." : "Enregistrer"}
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* Modal Rhum */}
       {showAddRum && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 className="text-2xl font-bold mb-8">Ajouter un Rhum</h3>
             <form onSubmit={handleAddRum} className="space-y-6">
               <div>
                 <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Nom du flacon</label>
-                <input autoFocus type="text" value={newRum.nom} onChange={(e) => setNewRum({...newRum, nom: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-200 focus:ring-4 focus:ring-amber-500/10 outline-none text-lg" placeholder="Don Papa..." required />
+                <input 
+                  autoFocus 
+                  type="text" 
+                  value={newRum.nom} 
+                  onChange={(e) => setNewRum({...newRum, nom: e.target.value})} 
+                  className="w-full p-5 rounded-2xl border border-amber-200 focus:ring-4 focus:ring-amber-500/10 outline-none text-lg" 
+                  placeholder="Don Papa, Diplomatico..." 
+                  required 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Couleur</label>
+                  <select value={newRum.couleur} onChange={(e) => setNewRum({...newRum, couleur: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-200 bg-white outline-none text-lg">
+                    <option>Blanc</option><option>Ambré</option><option>Vieux</option><option>Dark</option><option>Épicé</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Degrés (%)</label>
+                  <input 
+                    type="number" 
+                    inputMode="decimal" 
+                    value={newRum.degres} 
+                    onChange={(e) => setNewRum({...newRum, degres: e.target.value})} 
+                    className="w-full p-5 rounded-2xl border border-amber-200 outline-none text-lg" 
+                    required 
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Couleur</label>
-                <select value={newRum.couleur} onChange={(e) => setNewRum({...newRum, couleur: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-200 bg-white outline-none text-lg">
-                  <option>Blanc</option><option>Ambré</option><option>Vieux</option><option>Dark</option><option>Épicé</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Degrés (%)</label>
-                <input type="number" inputMode="decimal" value={newRum.degres} onChange={(e) => setNewRum({...newRum, degres: Number(e.target.value)})} className="w-full p-5 rounded-2xl border border-amber-200 outline-none text-lg" required />
+                <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Description (Facultatif)</label>
+                <textarea 
+                  value={newRum.description} 
+                  onChange={(e) => setNewRum({...newRum, description: e.target.value})} 
+                  className="w-full p-5 rounded-2xl border border-amber-200 outline-none text-lg resize-none" 
+                  placeholder="Notes de fond, origine, histoire..."
+                  rows={3}
+                />
               </div>
               <div className="flex items-center justify-between p-5 bg-amber-50 rounded-2xl border border-amber-100">
                 <span className="font-bold text-amber-900">En stock</span>
-                <button type="button" onClick={() => setNewRum({...newRum, enStock: !newRum.enStock})} className={`w-16 h-9 flex items-center rounded-full p-1 transition-colors ${newRum.enStock ? 'bg-amber-600' : 'bg-gray-300'}`}>
+                <button 
+                  type="button" 
+                  onClick={() => setNewRum({...newRum, enStock: !newRum.enStock})} 
+                  className={`w-16 h-9 flex items-center rounded-full p-1 transition-colors ${newRum.enStock ? 'bg-amber-600' : 'bg-gray-300'}`}
+                >
                   <div className={`bg-white w-7 h-7 rounded-full shadow-md transform transition-transform ${newRum.enStock ? 'translate-x-7' : 'translate-x-0'}`} />
                 </button>
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowAddRum(false)} className="flex-1 py-5 font-bold text-amber-900 bg-amber-100 rounded-2xl">Annuler</button>
-                <button type="submit" disabled={loading} className="flex-1 py-5 font-bold text-white bg-amber-800 rounded-2xl shadow-lg">Enregistrer</button>
+                <button 
+                  type="submit" 
+                  disabled={loading || !newRum.nom.trim()} 
+                  className="flex-1 py-5 font-bold text-white bg-amber-800 rounded-2xl shadow-lg disabled:opacity-50 active:scale-95 transition-transform"
+                >
+                  {loading ? "Enregistrement..." : "Enregistrer"}
+                </button>
               </div>
             </form>
           </div>

@@ -12,6 +12,7 @@ export interface Rum {
   couleur: string;
   degres: number;
   enStock: boolean;
+  description?: string;
 }
 
 export interface Tasting {
