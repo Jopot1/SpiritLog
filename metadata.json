@@ -1,0 +1,5 @@
+{
+  "name": "SpiritLog",
+  "description": "Application de dégustation de spiritueux optimisée pour iPad, permettant de gérer les utilisateurs, les stocks et les notes de dégustation.",
+  "requestFramePermissions": []
+}

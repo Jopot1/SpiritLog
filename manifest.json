@@ -1,0 +1,24 @@
+
+{
+  "short_name": "SpiritLog",
+  "name": "SpiritLog - Carnet de Dégustation",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#5d4037",
+  "background_color": "#f8f1e7",
+  "orientation": "portrait"
+}
