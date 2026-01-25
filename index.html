@@ -12,8 +12,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SpiritLog" />
     
-    <!-- Icônes pour iOS (Pensez à ajouter ces fichiers à la racine) -->
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- Icônes pour iOS (Home Screen Icon) -->
+    <!-- On utilise logo.png comme icône principale si c'est ce que l'utilisateur souhaite voir -->
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/logo.png" />
+    
+    <!-- SplashScreen / Startup Image -->
     <link rel="apple-touch-startup-image" href="/logo.png" />
     
     <meta name="theme-color" content="#5d4037" />
@@ -30,7 +36,6 @@
       .safe-top { padding-top: env(safe-area-inset-top); }
       .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
       
-      /* Amélioration visuelle pour iPad */
       @media (min-width: 768px) {
         .custom-container {
           max-width: 800px;
@@ -38,14 +43,12 @@
         }
       }
 
-      /* Transitions fluides pour les interactions iPad */
       .transition-all {
         transition-property: all;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 200ms;
       }
 
-      /* Animation d'entrée pour les écrans */
       .animate-in {
         animation: fadeIn 0.4s ease-out;
       }
