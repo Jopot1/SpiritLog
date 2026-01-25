@@ -13,6 +13,7 @@ const Home: React.FC = () => {
   const [newUser, setNewUser] = useState({ nom: '', prenom: '' });
   const [newRum, setNewRum] = useState({ nom: '', couleur: 'Ambré', degres: 40, enStock: true });
   const [loading, setLoading] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,12 +70,33 @@ const Home: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-10">
-      <header className="bg-white p-8 rounded-[2rem] shadow-sm border border-amber-100 mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-3 text-[#3d2b1f]">
-          <LayoutDashboard className="text-amber-800" size={32} />
+      {/* SECTION LOGO HERO D'ACCUEIL */}
+      <section className="flex flex-col items-center justify-center py-10 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-amber-500/20 blur-3xl rounded-full"></div>
+          <div className="relative bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl border border-amber-100 flex items-center justify-center overflow-hidden h-32 w-32 md:h-48 md:w-48">
+             {!logoError ? (
+               <img 
+                 src="logo.png" 
+                 alt="Logo SpiritLog" 
+                 className="h-full w-full object-contain" 
+                 onError={() => setLogoError(true)}
+               />
+             ) : (
+               <Wine size={80} className="text-amber-800" />
+             )}
+          </div>
+        </div>
+        <h2 className="text-5xl font-black text-[#3d2b1f] tracking-tighter">SpiritLog</h2>
+        <p className="text-amber-700 font-bold text-lg mt-2 uppercase tracking-[0.3em]">Votre cave personnelle</p>
+      </section>
+
+      <header className="bg-white p-8 rounded-[2rem] shadow-sm border border-amber-100">
+        <h1 className="text-2xl font-bold flex items-center gap-3 text-[#3d2b1f]">
+          <LayoutDashboard className="text-amber-800" size={28} />
           Tableau de Bord
         </h1>
-        <p className="text-amber-700 mt-2 font-medium">Gérez vos membres et votre collection</p>
+        <p className="text-amber-700 mt-1 font-medium">Gérez vos membres et votre collection</p>
       </header>
 
       <div className="flex flex-wrap gap-4">
@@ -129,7 +151,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Modals existants avec style amélioré */}
+      {/* Modals */}
       {showAddUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl">
