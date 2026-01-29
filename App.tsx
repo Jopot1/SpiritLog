@@ -10,6 +10,17 @@ import Inventory from './pages/Inventory';
 import SearchRate from './pages/SearchRate';
 import Auth from './pages/Auth';
 
+/**
+ * Composant pour forcer le scroll en haut lors des changements de route
+ */
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 const Layout: React.FC<{ children: React.ReactNode, user: FirebaseUser | null }> = ({ children, user }) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -90,6 +101,8 @@ const App: React.FC = () => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
+      // Forcer le scroll en haut lors du changement d'état d'authentification
+      window.scrollTo(0, 0);
     });
     return () => unsubscribe();
   }, []);
@@ -104,6 +117,7 @@ const App: React.FC = () => {
 
   return (
     <HashRouter>
+      <ScrollToTop />
       <Layout user={user}>
         <Routes>
           {!user ? (
