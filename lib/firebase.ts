@@ -7,11 +7,11 @@ import {
   persistentMultipleTabManager,
   collection
 } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 /**
  * CONFIGURATION FIREBASE
- * Remplace ces valeurs par celles fournies dans ta console Firebase :
- * https://console.firebase.google.com/
+ * Remplace ces valeurs par celles fournies dans ta console Firebase.
  */
 const firebaseConfig = {
   apiKey: "AIzaSyDPrJ2NLkMAuziYvyF0G1nsa2SH14kRosk",
@@ -26,14 +26,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-// Initialisation de Firestore avec le nouveau système de cache persistant (Auto-géré)
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()
   })
 });
 
-// Références de collections
-export const usersCol = collection(db, 'users');
-export const rumsCol = collection(db, 'rums');
-export const tastingsCol = collection(db, 'tastings');
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+
+// Fonctions d'aide pour obtenir les collections spécifiques à l'utilisateur
+export const getUserDoc = (uid: string) => `users/${uid}`;
+export const getMembersCol = (uid: string) => collection(db, `users/${uid}/members`);
+export const getRumsCol = (uid: string) => collection(db, `users/${uid}/rums`);
+export const getTastingsCol = (uid: string) => collection(db, `users/${uid}/tastings`);
