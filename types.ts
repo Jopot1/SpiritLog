@@ -12,6 +12,7 @@ export interface Rum {
   couleur: string;
   degres: number;
   enStock: boolean;
+  provenance: string;
   description?: string;
 }
 

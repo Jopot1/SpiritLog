@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, Wine, List, User as UserIcon, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { UserPlus, Wine, List, User as UserIcon, ChevronRight, LayoutDashboard, MapPin } from 'lucide-react';
 import { onSnapshot, addDoc } from 'firebase/firestore';
 import { auth, getMembersCol, getRumsCol } from '../lib/firebase';
 import { User } from '../types';
@@ -17,6 +17,7 @@ const Home: React.FC = () => {
     nom: '', 
     couleur: 'Ambré', 
     degres: '40', 
+    provenance: '',
     enStock: true, 
     description: '' 
   });
@@ -64,7 +65,7 @@ const Home: React.FC = () => {
 
   const handleAddRum = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newRum.nom.trim() || loading) return;
+    if (!user || !newRum.nom.trim() || !newRum.provenance.trim() || loading) return;
     
     setLoading(true);
     try {
@@ -72,10 +73,11 @@ const Home: React.FC = () => {
         nom: newRum.nom.trim(),
         couleur: newRum.couleur,
         degres: parseFloat(newRum.degres) || 0,
+        provenance: newRum.provenance.trim(),
         enStock: newRum.enStock,
         description: (newRum.description || '').trim() || null
       });
-      setNewRum({ nom: '', couleur: 'Ambré', degres: '40', enStock: true, description: '' });
+      setNewRum({ nom: '', couleur: 'Ambré', degres: '40', provenance: '', enStock: true, description: '' });
       setShowAddRum(false);
       setTimeout(() => navigate('/inventory'), 100);
     } catch (err: any) {
@@ -132,7 +134,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Modals - Same UI, only handler changes */}
       {showAddUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl">
@@ -140,11 +141,11 @@ const Home: React.FC = () => {
             <form onSubmit={handleAddMember} className="space-y-6">
               <div>
                 <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Prénom</label>
-                <input autoFocus type="text" value={newUser.prenom} onChange={(e) => setNewUser({...newUser, prenom: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-200 outline-none text-lg" required />
+                <input autoFocus type="text" value={newUser.prenom} onChange={(e) => setNewUser({...newUser, prenom: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-100 bg-amber-50/30 outline-none text-lg" required />
               </div>
               <div>
                 <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Nom</label>
-                <input type="text" value={newUser.nom} onChange={(e) => setNewUser({...newUser, nom: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-200 outline-none text-lg" required />
+                <input type="text" value={newUser.nom} onChange={(e) => setNewUser({...newUser, nom: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-100 bg-amber-50/30 outline-none text-lg" required />
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowAddUser(false)} className="flex-1 py-5 font-bold text-amber-900 bg-amber-100 rounded-2xl">Annuler</button>
@@ -174,6 +175,13 @@ const Home: React.FC = () => {
                 <div>
                   <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Degrés (%)</label>
                   <input type="number" step="0.1" value={newRum.degres} onChange={(e) => setNewRum({...newRum, degres: e.target.value})} className="w-full p-5 rounded-2xl border border-amber-200 outline-none text-lg" required />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold uppercase text-amber-800 mb-2 px-1">Provenance</label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-300" size={20} />
+                  <input type="text" value={newRum.provenance} onChange={(e) => setNewRum({...newRum, provenance: e.target.value})} className="w-full pl-12 pr-6 py-5 rounded-2xl border border-amber-200 outline-none text-lg" placeholder="Ex: Martinique" required />
                 </div>
               </div>
               <div>
